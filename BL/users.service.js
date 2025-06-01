@@ -1,4 +1,4 @@
-const controller = require("../DL/controller/users.controller")
+const controller = require("../DL/controllers/users.controller")
 
 
 const createUser = async (data = {}) => {
@@ -18,4 +18,4 @@ const login = async (filter = {}) => {
     }
 };
 
-module.exports = { createUser, getUser, login, getManyUsers, updateUserInfo, deleteUser }
+module.exports = { createUser, getUser, login }

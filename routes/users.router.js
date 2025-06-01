@@ -1,12 +1,12 @@
 const express = require("express"),
-    router = express.Router()
-    service = require("../BL/user.service")
+    router = express.Router(),
+    service = require("../BL/users.service")
 router.post("/register", async (req, res) => {
     try {
         res.send(await service.createUser(req.body))
 
     } catch (error) {
-        
+
     }
 })
 router.get("/login", async (req, res) => {
