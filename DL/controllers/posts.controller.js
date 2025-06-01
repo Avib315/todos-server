@@ -2,38 +2,33 @@
 
 const pool = require("../db"); // Adjust path to your db.js file
 // CRUD
-async function create({ userId, todoTask, isCompleted }) {
+async function create({ userId, title, body }) {
   try {
     const query =
-      "INSERT INTO todos (user_id, title, completed) VALUES (?, ?, ?)";
-    const [result] = await pool.execute(query, [userId, todoTask, isCompleted]);
+      "INSERT INTO posts (user_id, title, body) VALUES (?, ?, ?)";
+    const [result] = await pool.execute(query, [userId, title, body]);
 
     return {
       success: true,
       id: result.insertId,
-      message: "Todo task created successfully",
+      message: "post created successfully",
     };
   } catch (error) {
-    console.error("Error creating todo:", error);
-    throw new Error("Failed to create todo task");
+    console.error("Error creating post:", error);
+    throw new Error("Failed to create post");
   }
 }
-async function readMany({ userId, isCompleted, taskName }) {
+async function readMany({ userId, title }) {
   try {
-    let query = "SELECT * FROM todos WHERE user_id = ?";
+    let query = "SELECT * FROM posts WHERE user_id = ?";
     let params = [userId];
 
     // מערך של תנאים נוספים
     const conditions = [];
 
-    if (isCompleted !== undefined && isCompleted !== null) {
-      conditions.push("completed = ?");
-      params.push(isCompleted);
-    }
-
-    if (taskName && taskName.trim() !== "") {
+    if (title && title.trim() !== "") {
       conditions.push("title LIKE ?");
-      params.push(`%${taskName}%`);
+      params.push(`%${title}%`);
     }
 
     // הוספת כל התנאים לשאילתה
@@ -46,7 +41,7 @@ async function readMany({ userId, isCompleted, taskName }) {
     return {
       success: true,
       data: result,
-      message: "Todo tasks loaded successfully",
+      message: "posts tasks loaded successfully",
     };
   } catch (error) {
     throw new Error("Failed to read todos");

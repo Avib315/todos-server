@@ -5,9 +5,17 @@ const express = require("express"),
 const todosService = require("../BL/todos.service");
 router.get("/", async (req, res) => {
   try {
-    res.send("Working");
+    const userId = req.query.userId;
+    const isCompleted = req.query.isCompleted;
+    const taskName = req.query.taskName;
+    if (!userId) {
+      return res.status(400).send("userId parameter is required");
+    }
+    const todos = await todosService.getTodos({ userId ,isCompleted, taskName});
+    res.send(todos);
   } catch (error) {
-    res.status(400).send("username or password are incorrect");
+    console.error(error);
+    res.status(500).send("Error fetching todos");
   }
 });
 router.post("/add-task", async (req, res) => {

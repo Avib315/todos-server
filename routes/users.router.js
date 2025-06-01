@@ -9,9 +9,18 @@ router.post("/register", async (req, res) => {
 
     }
 })
-router.get("/login", async (req, res) => {
+router.put("/login", async (req, res) => {
     try {
-        res.send(await service.getUser())
+        if (!req.body.username || !req.body.password) {
+            return res.status(400).send("username and password are required");
+        }
+        const data = await service.login(req.body)
+        if(data){
+            res.send({
+                isLogin: true,
+                user:data
+            })
+        }
     } catch (error) {
         res.status(400).send("username or password are incorrect")
     }
