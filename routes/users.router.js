@@ -16,3 +16,5 @@ router.get("/login", async (req, res) => {
         res.status(400).send("username or password are incorrect")
     }
 })
+
+module.exports = router
