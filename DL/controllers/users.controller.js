@@ -1,13 +1,25 @@
 const pool = require("../db");
 
 // CRUD
-async function create({username , password , email , fullname , address}) {
-// user create model
+async function create({username , password , email , fullname , company_name, city , street , phone}) {
+    try {
+        const query = "INSERT INTO users (username, email, full_name, company_name, city , street, phone) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        const [result] = await pool.execute(query, [username, email, fullname, company_name, city , street, phone]);
+        
+        // Insert password into users_passwords table
+        const userId = result.insertId;
+        const passwordQuery = "INSERT INTO users_passwords (user_id, password_hash) VALUES (?, ?)";
+        await pool.execute(passwordQuery, [userId, password]);
+
+        return { id: userId ,username , password , email , fullname , company_name, city , street};
+    } catch (error) {
+        console.error("Error creating user:", error);
+        throw new Error("Failed to create user");
+    }
 }
-async function readOneUser(filter) {
+async function readOneUser(username) {
     try {
 
-        const { username } = filter;
         const query = "SELECT * FROM users WHERE username = ?"; 
         const [result] = await pool.execute(query, [username]);       
         return result[0] || null; // Return the first user or null if not found

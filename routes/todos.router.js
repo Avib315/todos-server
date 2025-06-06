@@ -7,11 +7,12 @@ router.get("/", async (req, res) => {
   try {
     const userId = req.query.userId;
     const isCompleted = req.query.isCompleted;
-    const taskName = req.query.taskName;
+    const taskName = req.query.title;
+    const id = req.query.id;
     if (!userId) {
       return res.status(400).send("userId parameter is required");
     }
-    const todos = await todosService.getTodos({ userId ,isCompleted, taskName});
+    const todos = await todosService.getTodos({ userId ,isCompleted, taskName , id});
     res.send(todos);
   } catch (error) {
     console.error(error);
@@ -20,9 +21,27 @@ router.get("/", async (req, res) => {
 });
 router.post("/add-task", async (req, res) => {
   try {
-    console.log("req.body", req.body);
-    const { userId, todoTask, isCompleted } = req.body;
-    res.send(todosService.createNewTodo({ userId, todoTask, isCompleted }));
+    const { userId, title, completed } = req.body;
+    res.send(todosService.createNewTodo({ userId, todoTask:title, isCompleted:completed }));
+  } catch (error) {
+    res.status(400).send("username or password are incorrect");
+  }
+});
+// avi?isAge=20
+// avi/15
+router.put("/update-task/:id", async (req, res) => {
+  try {
+      const taskId = req.params.id;
+    const { userId, title, completed , } = req.body;
+    res.send(todosService.updateTodo({ userId, todoTask:title, isCompleted:completed , id: taskId }));
+  } catch (error) {
+    res.status(400).send("username or password are incorrect");
+  }
+});
+router.delete("/delete-task/:id", async (req, res) => {
+  try {
+      const taskId = req.params.id;
+    res.send(todosService.deleteTodo({ id: taskId }));
   } catch (error) {
     res.status(400).send("username or password are incorrect");
   }

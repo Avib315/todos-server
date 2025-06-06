@@ -18,7 +18,7 @@ async function create({ userId, todoTask, isCompleted }) {
     throw new Error("Failed to create todo task");
   }
 }
-async function readMany({ userId, isCompleted, taskName }) {
+async function readMany({ userId, isCompleted, taskName , id}) {
   try {
     let query = "SELECT * FROM todos WHERE user_id = ?";
     let params = [userId];
@@ -28,12 +28,20 @@ async function readMany({ userId, isCompleted, taskName }) {
 
     if (isCompleted !== undefined && isCompleted !== null) {
       conditions.push("completed = ?");
-      params.push(isCompleted);
+      if( isCompleted === "true") {
+        params.push(1);
+      } else if (isCompleted === "false") {
+        params.push(0); 
+      }
     }
 
     if (taskName && taskName.trim() !== "") {
       conditions.push("title LIKE ?");
       params.push(`%${taskName}%`);
+    }
+    if (id) {
+      conditions.push("id = ?");
+      params.push(id);
     }
 
     // הוספת כל התנאים לשאילתה
@@ -55,11 +63,74 @@ async function readMany({ userId, isCompleted, taskName }) {
 async function readOne(filter) {
   // get one todo
 }
-async function update(id, data) {
-  // update todos
+async function update(data) {
+  const { id, userId, todoTask, isCompleted } = data;
+  
+  // First, check if the todo exists and belongs to the user
+  let checkQuery = "SELECT * FROM todos WHERE id = ? AND user_id = ?";
+  let checkParams = [id, userId];
+  
+  try {
+    const existingTodo = await pool.query(checkQuery, checkParams);
+    if (!existingTodo || existingTodo.length === 0) {
+      throw new Error("Todo not found or access denied");
+    }
+
+    // Build the update query dynamically
+    const updateFields = [];
+    const updateParams = [];
+
+    if (todoTask !== undefined && todoTask !== null) {
+      updateFields.push("title = ?");
+      updateParams.push(todoTask);
+    }
+    
+    if (isCompleted !== undefined && isCompleted !== null) {
+      updateFields.push("completed = ?");
+      updateParams.push(isCompleted);
+    }
+
+    if (updateFields.length === 0) {
+      throw new Error("No fields to update");
+    }
+ 
+    let updateQuery = `UPDATE todos SET ${updateFields.join(", ")} WHERE id = ? AND user_id = ?`;
+    updateParams.push(id, userId);
+
+    // Execute the update
+    const result = await pool.query(updateQuery, updateParams);
+    
+    if (result.affectedRows === 0) {
+      throw new Error("Todo not found or no changes made");
+    }
+
+    // Return the updated todo
+    const updatedTodo = await pool.query("SELECT * FROM todos WHERE id = ?", [id]);
+    return updatedTodo[0];
+    
+  } catch (error) {
+    console.error("Error updating todo:", error);
+    throw error;
+  }
 }
 async function deleteById(id) {
   // delete todo
+  try {
+    const query = "DELETE FROM todos WHERE id = ?";
+    const [result] = await pool.execute(query, [id]);
+
+    if (result.affectedRows === 0) {
+      throw new Error("Todo not found");
+    }
+
+    return {
+      success: true,
+      message: "Todo task deleted successfully",
+    };
+  } catch (error) {
+    console.error("Error deleting todo:", error);
+    throw new Error("Failed to delete todo task");
+  }
 }
 
 module.exports = { create, readOne, readMany, update, deleteById };

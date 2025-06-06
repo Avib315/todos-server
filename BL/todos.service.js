@@ -14,7 +14,19 @@ const getTodos = async (filter) => {
   }
   return await controller.readMany(filter);
 };
-const updateTodo = async (data) => {};
-const deleteTodo = async (data) => {};
+const updateTodo = async (data) => {
+  if (!data.id || !data.userId || !data.todoTask) {
+    throw new Error("id, userId, and todoTask are required fields to update a todo");
+  }
+  return await controller.update(data);
+
+  
+};
+const deleteTodo = async (data) => {
+  if (!data.id) {
+    throw new Error("id is required to delete a todo");
+  }
+  return await controller.deleteById(data.id);
+};
 
 module.exports = { createNewTodo, getTodos, updateTodo, deleteTodo };

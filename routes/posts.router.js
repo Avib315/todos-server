@@ -15,7 +15,6 @@ router.get("/", async (req, res) => {
 })
 router.post("/add-post", async (req, res) => {
     try {
-        console.log("req.body", req.body)
         const { userId, title, body } = req.body
         res.send(await postsService.createNewPost({ userId, title, body }))
     } catch (error) {
